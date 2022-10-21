@@ -124,7 +124,7 @@ macro_rules! easy_ffi {
                 $dol (#[$attr])*
                 pub extern "C" fn $fn_name($dol ($arg : $arg_ty),*) -> $ok_ty {
                     let safe_res:
-                        ::std::result::Result<$ok_ty, ::std::result::Result<$err_ty, Box<::std::any::Any + Send + 'static>>> =
+                        ::std::result::Result<$ok_ty, ::std::result::Result<$err_ty, Box<dyn(::std::any::Any) + Send + 'static>>> =
                         ::std::panic::catch_unwind(move || $body)
                             .map_err(|e| ::std::result::Result::Err(e))
                             .and_then(|ok| ok.map_err(|e| ::std::result::Result::Ok(e)));
@@ -157,13 +157,13 @@ mod tests {
         }
     );
 
-    my_ffi_fn! (
+    my_ffi_fn!(
         /// Foo: do stuff
         fn foo(i: i32) -> Result<i32, &'static str> {
             match i {
                 5 => panic!("I'm afraid of 5's!"),
                 i if i <= 0 => Err("already <= 0, can't go lower"),
-                i => Ok(i-1),
+                i => Ok(i - 1),
             }
         }
     );
